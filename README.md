@@ -1,6 +1,6 @@
 # Sonatype Lifecycle Policy Violation Report Generator
 
-[![License](https://img.shields.io/github/license/sonatype-nexus-community/iq-legal-use-case-report)](LICENSE)
+[![License](https://img.shields.io/github/license/sonatype-nexus-community/iq-pv-reporter)](LICENSE)
 
 A Python script to generate reports from Sonatype Lifecycle identifying all Policy Violations with associated Application Category information, component details, and license data.
 
