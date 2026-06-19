@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/sonatype-nexus-community/iq-pv-reporter)](LICENSE)
 
-A Python script to generate reports from Sonatype Lifecycle identifying all Policy Violations with associated Application Category information, component details, and license data.
+A Go command-line tool to generate reports from Sonatype Lifecycle identifying all Policy Violations with associated Application Category information, component details, and license data.
 
 ---
 
@@ -21,37 +21,28 @@ A Python script to generate reports from Sonatype Lifecycle identifying all Poli
 
 ## Prerequisites
 
-- **Python**: 3.8 or higher
 - **Sonatype IQ Server**: Version 177+ recommended
 - **Access**: Valid credentials (username/password or user token) with appropriate permissions
 
 ### Required Permissions
 
-The account used to run this script requires:
+The account used to run this tool requires:
 - View IQ Elements
 
 ---
 
 ## Installation
 
-### 1. Clone or Download
+### Download Binary
+
+Download the latest release for your platform from the [Releases](https://github.com/sonatype-nexus-community/iq-pv-reporter/releases) page.
+
+### Build from Source
 
 ```bash
-git clone https://github.com/sonatype-nexus-community/iq-legal-use-case-report.git
-cd iq-legal-use-case-report
-```
-
-### 2. Create Virtual Environment
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
+git clone https://github.com/sonatype-nexus-community/iq-pv-reporter.git
+cd iq-pv-reporter
+go build -o iq-pv-reporter .
 ```
 
 ---
@@ -61,32 +52,33 @@ pip install -r requirements.txt
 ### Basic Syntax
 
 ```bash
-python iq_legal_use_case_report.py -u <IQ_URL> --username <USER> --password <PASS> -p <POLICY_PREFIX>
+./iq-pv-reporter --url <IQ_URL> --username <USER> --password <PASS> -p <POLICY_PREFIX>
 ```
 
 ### Required Arguments
 
 | Argument | Description |
 |----------|-------------|
-| `-p, --legal-policy-prefix` | Prefix to identify policies (e.g., "License-", "Legal-") |
+| `-p, --policy-prefix` | Prefix to identify policies (e.g., "License-", "Legal-") |
 
 ### Authentication (one required)
 
-| Argument | Description |
-|----------|-------------|
-| `--username` + `--password` | Basic authentication credentials |
-| `--user-token` | User token for authentication |
+| Argument | Environment Variable | Description |
+|----------|---------------------|-------------|
+| `--username` + `--password` | `IQ_SERVER_USERNAME` + `IQ_SERVER_PASSWORD` | Basic authentication credentials |
+| `--user-token` | | User token for authentication |
 
 ### Optional Arguments
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `-u, --url` | `http://localhost:8070` | IQ Server URL |
+| `--url` | (required) | IQ Server URL (or set `IQ_SERVER_URL`) |
 | `-s, --stage` | `build` | Stage ID to filter violations |
 | `-o, --output` | (none) | Output CSV file path |
-| `--include-waived` | `True` | Include waived violations |
-| `--no-verify-ssl` | `False` | Disable SSL verification |
-| `-d, --debug` | `False` | Enable debug logging |
+| `--include-waived` | `true` | Include waived violations |
+| `--no-verify-ssl` | `false` | Disable SSL verification |
+| `-d, --debug` | `false` | Enable debug logging |
+| `--version` | | Show version information |
 
 ---
 
@@ -95,18 +87,28 @@ python iq_legal_use_case_report.py -u <IQ_URL> --username <USER> --password <PAS
 ### Basic Usage with Username/Password
 
 ```bash
-python iq_legal_use_case_report.py \
-  -u https://iq.example.com \
+./iq-pv-reporter \
+  --url https://iq.example.com \
   --username admin \
   --password admin123 \
   -p "License-"
 ```
 
+### Using Environment Variables
+
+```bash
+export IQ_SERVER_URL=https://iq.example.com
+export IQ_SERVER_USERNAME=admin
+export IQ_SERVER_PASSWORD=admin123
+
+./iq-pv-reporter -p "License-"
+```
+
 ### Using User Token Authentication
 
 ```bash
-python iq_legal_use_case_report.py \
-  -u https://iq.example.com \
+./iq-pv-reporter \
+  --url https://iq.example.com \
   --user-token YOUR_USER_TOKEN \
   -p "License-"
 ```
@@ -114,8 +116,8 @@ python iq_legal_use_case_report.py \
 ### Filter by Source Stage
 
 ```bash
-python iq_legal_use_case_report.py \
-  -u https://iq.example.com \
+./iq-pv-reporter \
+  --url https://iq.example.com \
   --username admin \
   --password admin123 \
   -p "License-" \
@@ -125,8 +127,8 @@ python iq_legal_use_case_report.py \
 ### Export to CSV
 
 ```bash
-python iq_legal_use_case_report.py \
-  -u https://iq.example.com \
+./iq-pv-reporter \
+  --url https://iq.example.com \
   --username admin \
   --password admin123 \
   -p "License-" \
@@ -136,8 +138,8 @@ python iq_legal_use_case_report.py \
 ### All Options Combined
 
 ```bash
-python iq_legal_use_case_report.py \
-  -u https://iq.example.com \
+./iq-pv-reporter \
+  --url https://iq.example.com \
   --username admin \
   --password admin123 \
   -p "License-" \
@@ -149,8 +151,8 @@ python iq_legal_use_case_report.py \
 ### Self-Signed Certificates
 
 ```bash
-python iq_legal_use_case_report.py \
-  -u https://iq-internal.company.local \
+./iq-pv-reporter \
+  --url https://iq-internal.company.local \
   --username admin \
   --password admin123 \
   -p "License-" \
@@ -163,7 +165,7 @@ python iq_legal_use_case_report.py \
 
 ### Terminal Output
 
-The script generates a single table with all policy violations:
+The tool generates a single table with all policy violations:
 
 ```
 ================================================================================
@@ -209,7 +211,7 @@ When `-o` is specified, a CSV file is generated with the following columns:
 
 ## Policy Identification
 
-The script identifies policies by name prefix. This is configurable per customer implementation:
+The tool identifies policies by name prefix. This is configurable per customer implementation:
 
 - Customer A might use: `"License-"` → `License-None`, `License-Copyleft`, etc.
 - Customer B might use: `"Legal-"` → `Legal-Commercial`, `Legal-Internal`, etc.
@@ -224,7 +226,7 @@ The prefix is case-sensitive and must match the beginning of the policy name exa
 ### Authentication Failed
 
 ```
-Error: Authentication failed. Check your credentials.
+Error: authentication failed (HTTP 401): check credentials
 ```
 
 - Verify username and password are correct
@@ -245,7 +247,7 @@ Error: Authentication failed. Check your credentials.
 ### Connection Errors
 
 ```
-Error: Could not connect to IQ Server at https://iq.example.com
+Error: Connection failed: IQ API error: ...
 ```
 
 - Verify IQ Server URL is correct and accessible
@@ -272,13 +274,27 @@ Error: Could not connect to IQ Server at https://iq.example.com
 
 ---
 
-## Limitations
+## Development
 
-1. **Pagination**: Current implementation handles typical response sizes. Very large IQ instances (1000+ applications) may require enhanced pagination handling.
+### Building
 
-2. **License Extraction**: License information is extracted from constraint violation reasons. Some custom policy types may require adjustment to the extraction logic.
+```bash
+go build -o iq-pv-reporter .
+```
 
-3. **Waiver Details**: Full waiver metadata (waiver creator, comments, expiry) is not currently included but could be added.
+### Running Tests
+
+```bash
+go test ./...
+```
+
+### Building for Multiple Platforms
+
+The project uses [GoReleaser](https://goreleaser.com/) for cross-platform builds:
+
+```bash
+goreleaser release --snapshot --clean
+```
 
 ---
 

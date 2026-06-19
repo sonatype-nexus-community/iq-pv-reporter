@@ -27,6 +27,15 @@ wheels/
 .installed.cfg
 *.egg
 
+# Go binaries
+iq-pv-reporter
+iq-pv-reporter.exe
+
+# Go
+*.test
+*.out
+vendor/
+
 # Output files
 *.csv
 report*.csv
