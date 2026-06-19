@@ -28,8 +28,7 @@ wheels/
 *.egg
 
 # Go binaries
-iq-pv-reporter
-iq-pv-reporter.exe
+iq-pv-reporter*
 
 # Go
 *.test
